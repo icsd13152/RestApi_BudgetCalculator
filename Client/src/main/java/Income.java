@@ -6,13 +6,12 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-
 /**
  *
  * @author p.petropoulos
  */
 public class Income {
-    
+
     private Double amount;
     private String inDate;
 
@@ -55,15 +54,30 @@ public class Income {
 
         } else {
             String result = res.readEntity(String.class);
-            
+
             System.out.println(result);
 
         }
 
     }
-    
-   
-    
+
+    public void getRequest() {
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://localhost:8080/RestServer/rest/resources/remainingsPerDay");
+        Response res = target.request(MediaType.APPLICATION_JSON).get();
+        if (res.getStatus() != 200) {
+            System.out.println("Something went wrong");
+            System.out.println(res.getStatus());
+
+        } else {
+            String result = res.readEntity(String.class);
+
+            System.out.println(result);
+
+        }
+
+    }
+
     @Override
     public String toString() {
         return "Income{" + "amount=" + amount + ", inComeDate=" + inDate + '}';

@@ -13,6 +13,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,6 +35,7 @@ public class Resources {
     private Connection con;
     private Statement st;
     private ArrayList<Outgoing> outgoingList = new ArrayList<Outgoing>();
+    //private ArrayList<RemainOutgoings> remainings = new ArrayList<RemainOutgoings>();
     private ArrayList<Income> incomeList = new ArrayList<Income>();
 
     @GET
@@ -69,7 +71,6 @@ public class Resources {
         try {
             Class.forName("org.sqlite.JDBC");
             con = DriverManager.getConnection("jdbc:sqlite:C:/sqlite/myDB.db");
-
             st = con.createStatement();
             ResultSet s = st.executeQuery("select * from incomes");
             while (s.next()) {
@@ -83,6 +84,51 @@ public class Resources {
             con.close();
             return Response.status(200).entity(incomeList).build();//epistrefei 200 ws status OK
         } catch (SQLException | ClassNotFoundException ex) {
+            Logger.getLogger(Resources.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return Response.status(500).entity("something went wrong").build();
+    }
+
+    @GET
+    @Path("remainingsPerDay")
+    @Produces("application/json")
+    public Response getReqOutgoings() {
+        double sumOfOutgoings = 0;
+        double remains = 0;
+        int days = 0;
+        
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        Date date = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        calendar.add(Calendar.MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.add(Calendar.DATE, -1);
+        Date lastDayOfMonth = calendar.getTime();
+        RemainOutgoings r=null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            con = DriverManager.getConnection("jdbc:sqlite:C:/sqlite/myDB.db");
+
+            st = con.createStatement();
+            ResultSet s = st.executeQuery("select * from incomes");
+            while (s.next()) {
+
+                String inDate = s.getString("date");
+                Double amount = s.getDouble("amount");
+                Date d = formatter.parse(inDate);
+                if (date.getMonth() == d.getMonth()) {
+                    remains = amount / (lastDayOfMonth.getDate()-date.getDate());
+                    r =new RemainOutgoings(lastDayOfMonth.getDate()-date.getDate(),remains);
+                    break;
+                }
+
+            }
+
+            con.close();
+            return Response.status(200).entity(r).build();
+        } catch (ClassNotFoundException | SQLException | ParseException ex) {
             Logger.getLogger(Resources.class.getName()).log(Level.SEVERE, null, ex);
         }
         return Response.status(500).entity("something went wrong").build();
@@ -110,7 +156,7 @@ public class Resources {
         }
         return Response.status(500).entity("error").build();
     }
-    
+
     @POST
     @Path("insertIncome")
     @Produces("application/json")
@@ -153,7 +199,7 @@ public class Resources {
                 String inDate = s.getString("date");
                 Date d2 = formatter.parse(inDate);
                 Double amount = s.getDouble("amount");
-                
+
                 if (d1.getMonth() == d2.getMonth()) {
                     if (d1.equals(d2)) {
                         s2 = st.executeUpdate("UPDATE incomes SET amount= " + (amount - o.getAmount()) + " WHERE date ='" + inDate + "'");

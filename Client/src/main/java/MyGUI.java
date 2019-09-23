@@ -16,13 +16,13 @@ import javax.swing.JTextField;
  */
 public class MyGUI extends JFrame {
 
-    private JPanel r1, r2, r3,r4;
-    private JTextField amount, date,token;
-    private JLabel a, d,t;
-    private JButton submit,get,insert;
+    private JPanel r1, r2, r3, r4;
+    private JTextField amount, date, token;
+    private JLabel a, d, t;
+    private JButton submit, get, insert, remains;
 
     public MyGUI() {
-        
+
         r1 = new JPanel();
         r2 = new JPanel();
         r3 = new JPanel();
@@ -39,12 +39,13 @@ public class MyGUI extends JFrame {
         submit = new JButton("submit");
         get = new JButton("retrieveAll");
         insert = new JButton("insertIncome");
+        remains = new JButton("get remains per day");
         a = new JLabel("amount: ");
         d = new JLabel("Date: ");
         t = new JLabel("token: ");
         Container pane = getContentPane();
 
-        GridLayout glayout = new GridLayout(3, 3);
+        GridLayout glayout = new GridLayout(3, 4);
         pane.setLayout(glayout);
         FlowLayout layout = new FlowLayout();
         r1.setLayout(layout);
@@ -59,31 +60,40 @@ public class MyGUI extends JFrame {
         r3.add(submit);
         r3.add(get);
         r3.add(insert);
+        r3.add(remains);
         pane.add(r3);
         pack();
-        
+
         submit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 Double am = Double.parseDouble(amount.getText());
-                Outgoing o = new Outgoing(am,date.getText());
+                Outgoing o = new Outgoing(am, date.getText());
             }
         });
-        
+
         get.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                
+
                 Outgoing o = new Outgoing();
                 o.getRequest();
             }
         });
-        
-         insert.addActionListener(new ActionListener() {
+
+        insert.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                
-               Double am = Double.parseDouble(amount.getText());
-               Income i = new Income(am,date.getText());
+
+                Double am = Double.parseDouble(amount.getText());
+                Income i = new Income(am, date.getText());
             }
         });
-        
+
+        remains.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                
+                Income i = new Income();
+                i.getRequest();
+            }
+        });
+
     }
 }
